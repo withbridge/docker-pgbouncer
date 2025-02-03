@@ -82,6 +82,16 @@ if [ -z "${PORT}" ]; then
   exit 1
 fi
 
+if [ -z "${STATS_USER}" ]; then
+  echo "Error: STATS_USER is not set"
+  exit 1
+fi
+
+if [ -z "${STATS_PASSWORD}" ]; then
+  echo "Error: STATS_PASSWORD is not set"
+  exit 1
+fi
+
 
 # Write the password with MD5 encryption, to avoid printing it during startup.
 # Notice that `docker inspect` will show unencrypted env variables.
@@ -101,6 +111,7 @@ if [ -n "$DB_USER" -a -n "$DB_PASSWORD" -a -e "${_AUTH_FILE}" ] && ! grep -q "^\
   fi
   pass="$DB_PASSWORD"
   echo "\"$DB_USER\" \"$pass\"" >> ${PG_CONFIG_DIR}/userlist.txt
+  echo "\"$STATS_USER\" \"$STATS_PASSWORD\"" >> ${PG_CONFIG_DIR}/userlist.txt
   echo "Wrote authentication credentials to ${PG_CONFIG_DIR}/userlist.txt"
 fi
 
@@ -113,6 +124,8 @@ sed -e "s/\${DB_HOST}/$DB_HOST/g" \
     -e "s/\${JOB_POOL_SIZE}/$JOB_POOL_SIZE/g" \
     -e "s/\${CONSOLE_POOL_SIZE}/$CONSOLE_POOL_SIZE/g" \
     -e "s/\${PORT}/$PORT/g" \
+    -e "s/\${STATS_USER}/$STATS_USER/g" \
+    -e "s/\${STATS_PASSWORD}/$STATS_PASSWORD/g" \
     ${PG_CONFIG_DIR}/pgbouncer.ini.template > ${PG_CONFIG_DIR}/pgbouncer.ini
 
 cat ${PG_CONFIG_DIR}/pgbouncer.ini
