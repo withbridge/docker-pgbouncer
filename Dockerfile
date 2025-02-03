@@ -1,6 +1,8 @@
 FROM alpine:3.13
 ARG VERSION=1.15.0
 
+COPY pgbouncer.ini.template /etc/pgbouncer/pgbouncer.ini.template
+
 # Inspiration from https://github.com/gmr/alpine-pgbouncer/blob/master/Dockerfile
 # hadolint ignore=DL3003,DL3018
 RUN \
@@ -18,8 +20,6 @@ RUN \
   # Manual install
   cp pgbouncer /usr/bin && \
   mkdir -p /etc/pgbouncer /var/log/pgbouncer /var/run/pgbouncer && \
-  # NOTE(steve) - just use our pgbouncer.ini from the project root
-  # cp ./pgbouncer.ini /etc/pgbouncer/pgbouncer.ini && \
   # entrypoint installs the configuration, allow to write as postgres user
   cp etc/pgbouncer.ini /etc/pgbouncer/pgbouncer.ini.example && \
   cp etc/userlist.txt /etc/pgbouncer/userlist.txt.example && \
