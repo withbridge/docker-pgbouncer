@@ -11,6 +11,8 @@ services:
     value: transaction
   - key: AUTH_TYPE
     value: scram-sha-256
+  - key: SERVER_TLS_SSLMODE
+    value: disable
   # NOTE(steve) only useful in session pool mode
   # - key: SERVER_RESET_QUERY
   #   value: DISCARD ALL
