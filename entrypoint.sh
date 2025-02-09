@@ -57,6 +57,11 @@ if [ -z "${CONSOLE_POOL_SIZE}" ]; then
   exit 1
 fi
 
+if [ -z "${UTIL_POOL_SIZE}" ]; then
+  echo "Error: UTIL_POOL_SIZE is not set"
+  exit 1
+fi
+
 if [ -z "${DB_HOST}" ]; then
   echo "Error: DB_HOST is not set"
   exit 1
@@ -123,6 +128,7 @@ sed -e "s/\${DB_HOST}/$DB_HOST/g" \
     -e "s/\${WEB_POOL_SIZE}/$WEB_POOL_SIZE/g" \
     -e "s/\${JOB_POOL_SIZE}/$JOB_POOL_SIZE/g" \
     -e "s/\${CONSOLE_POOL_SIZE}/$CONSOLE_POOL_SIZE/g" \
+    -e "s/\${UTIL_POOL_SIZE}/$UTIL_POOL_SIZE/g" \
     -e "s/\${PORT}/$PORT/g" \
     -e "s/\${STATS_USER}/$STATS_USER/g" \
     -e "s/\${STATS_PASSWORD}/$STATS_PASSWORD/g" \

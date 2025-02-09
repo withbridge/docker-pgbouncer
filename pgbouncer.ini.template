@@ -2,6 +2,7 @@
 web_${DB_NAME} = host=${DB_HOST} port=${DB_PORT} auth_user=${DB_USER} dbname=${DB_NAME} pool_size=${WEB_POOL_SIZE}
 job_${DB_NAME} = host=${DB_HOST} port=${DB_PORT} auth_user=${DB_USER} dbname=${DB_NAME} pool_size=${JOB_POOL_SIZE}
 console_${DB_NAME} = host=${DB_HOST} port=${DB_PORT} auth_user=${DB_USER} dbname=${DB_NAME} pool_size=${CONSOLE_POOL_SIZE}
+util_${DB_NAME} = host=${DB_HOST} port=${DB_PORT} auth_user=${DB_USER} dbname=${DB_NAME} pool_size=${UTIL_POOL_SIZE}
 
 [pgbouncer]
 listen_addr = 0.0.0.0
