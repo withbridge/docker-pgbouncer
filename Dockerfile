@@ -1,39 +1,34 @@
-FROM alpine:3.13
-ARG VERSION=1.15.0
-
-COPY pgbouncer.ini.template /etc/pgbouncer/pgbouncer.ini.template
+FROM alpine:3.21 AS build
+ARG VERSION=1.24.0
 
 # Inspiration from https://github.com/gmr/alpine-pgbouncer/blob/master/Dockerfile
 # hadolint ignore=DL3003,DL3018
-RUN \
-  # security
-  apk add -U --no-cache --upgrade busybox && \
-  # Download
-  apk add -U --no-cache autoconf autoconf-doc automake udns udns-dev curl gcc libc-dev libevent libevent-dev libtool make openssl-dev pkgconfig postgresql-client && \
-  curl -o  /tmp/pgbouncer-$VERSION.tar.gz -L https://pgbouncer.github.io/downloads/files/$VERSION/pgbouncer-$VERSION.tar.gz && \
-  cd /tmp && \
-  # Unpack, compile
-  tar xvfz /tmp/pgbouncer-$VERSION.tar.gz && \
-  cd pgbouncer-$VERSION && \
-  ./configure --prefix=/usr --with-udns && \
-  make && \
-  # Manual install
-  cp pgbouncer /usr/bin && \
+RUN apk add --no-cache autoconf autoconf-doc automake curl gcc git libc-dev libevent-dev libtool make openssl-dev pandoc pkgconfig
+
+# build version for release
+RUN curl -sS -o /pgbouncer.tar.gz -L https://pgbouncer.github.io/downloads/files/$VERSION/pgbouncer-$VERSION.tar.gz && \
+  tar -xzf /pgbouncer.tar.gz && mv /pgbouncer-$VERSION /pgbouncer
+
+# build latest from git for test
+# RUN git clone https://github.com/pgbouncer/pgbouncer.git && cd pgbouncer && \
+#   git fetch origin pull/1120/head:test && git checkout test && \
+#   git submodule init && git submodule update && ./autogen.sh
+
+RUN cd /pgbouncer && ./configure --prefix=/usr && make
+
+FROM alpine:3.21
+
+RUN apk add --no-cache busybox libevent postgresql-client && \
   mkdir -p /etc/pgbouncer /var/log/pgbouncer /var/run/pgbouncer && \
-  # entrypoint installs the configuration, allow to write as postgres user
-  cp etc/pgbouncer.ini /etc/pgbouncer/pgbouncer.ini.example && \
-  cp etc/userlist.txt /etc/pgbouncer/userlist.txt.example && \
   touch /etc/pgbouncer/userlist.txt && \
-  addgroup -g 70 -S postgres 2>/dev/null && \
-  adduser -u 70 -S -D -H -h /var/lib/postgresql -g "Postgres user" -s /bin/sh -G postgres postgres 2>/dev/null && \
-  chown -R postgres /var/run/pgbouncer /etc/pgbouncer && \
-  # Cleanup
-  cd /tmp && \
-  rm -rf /tmp/pgbouncer*  && \
-  apk del --purge autoconf autoconf-doc automake udns-dev curl gcc libc-dev libevent-dev libtool make libressl-dev pkgconfig
+  chown -R postgres /var/log/pgbouncer /var/run/pgbouncer /etc/pgbouncer
 
 COPY entrypoint.sh /entrypoint.sh
-USER postgres
+COPY --from=build /pgbouncer/pgbouncer /usr/bin
+COPY --from=build /pgbouncer/etc/pgbouncer.ini /etc/pgbouncer/pgbouncer.ini.example
+COPY --from=build /pgbouncer/etc/userlist.txt /etc/pgbouncer/userlist.txt.example
+COPY pgbouncer.ini.template /etc/pgbouncer/pgbouncer.ini.template
 EXPOSE 5432
+USER postgres
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/bin/pgbouncer", "/etc/pgbouncer/pgbouncer.ini"]
