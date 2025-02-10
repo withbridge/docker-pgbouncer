@@ -19,7 +19,7 @@ max_client_conn = 10000
 
 # equal to setting in config/database.yml in monorail repo
 # see: https://www.timescale.com/blog/boosting-postgres-performance-with-prepared-statements-and-pgbouncers-transaction-mode
-# max_prepared_statements = 100
+max_prepared_statements = 100
 
 admin_users = postgres
 stats_users = prometheus
