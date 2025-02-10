@@ -1,5 +1,5 @@
-FROM alpine:3.13
-ARG VERSION=1.15.0
+FROM alpine:3.21
+ARG VERSION=1.24.0
 
 COPY pgbouncer.ini.template /etc/pgbouncer/pgbouncer.ini.template
 
